@@ -60,7 +60,7 @@ case "$1" in
         stop
         ;;
     status)
-	check_status
+	      check_status
         ;;
     reload|force-reload)
         reload

@@ -1,17 +1,20 @@
-%define debug_package %{nil}
+%{buildroot}%define debug_package %{nil}
 
-Name:		node-exporter-sysvinit
-Version:	0.12.0
-Release:	1%{?dist}
-Summary:	Prometheus exporter for machine metrics, written in Go with pluggable metric collectors.
-Group:		System Environment/Daemons
-License:	See the LICENSE file at github.
-URL:		https://github.com/prometheus/node_exporter
-Source0:        https://github.com/prometheus/node_exporter/releases/download/%{version}/node_exporter-%{version}.linux-amd64.tar.gz
-BuildRoot:	%{_tmppath}/%{name}-%{version}-root
+Name:		        node-exporter-init
+Version:	      0.16.0
+Release:	      1%{?dist}
+Summary:	      Prometheus exporter for machine metrics, written in Go with pluggable metric collectors.
+Group:		      System Environment/Daemons
+License:	      ASL 2.0
+URL:		        https://github.com/prometheus/node_exporter
+Source0:        node_exporter-%{pkg_version}.linux-amd64.tar.gz
+Source1:        node_exporter.init
+Source2:        node_exporter.sysconfig
+BuildRoot:      %{buildroot}
+BuildArch:      x86_64
 Requires(pre):  /usr/sbin/useradd
 Requires:       daemonize
-AutoReqProv:	No
+AutoReqProv:	  No
 
 %description
 
@@ -24,15 +27,15 @@ Prometheus exporter for machine metrics, written in Go with pluggable metric col
 echo
 
 %install
-mkdir -vp $RPM_BUILD_ROOT/var/log/prometheus/
-mkdir -vp $RPM_BUILD_ROOT/var/run/prometheus
-mkdir -vp $RPM_BUILD_ROOT/var/lib/prometheus
-mkdir -vp $RPM_BUILD_ROOT/usr/bin
-mkdir -vp $RPM_BUILD_ROOT/etc/init.d
-mkdir -vp $RPM_BUILD_ROOT/etc/sysconfig
-install -m 755 node_exporter-%{version}.linux-amd64/node_exporter $RPM_BUILD_ROOT/usr/bin/node_exporter
-install -m 755 contrib/node_exporter.init $RPM_BUILD_ROOT/etc/init.d/node_exporter
-install -m 644 contrib/node_exporter.sysconfig $RPM_BUILD_ROOT/etc/sysconfig/node_exporter
+mkdir -vp %{buildroot}/var/log/prometheus/
+mkdir -vp %{buildroot}/var/run/prometheus
+mkdir -vp %{buildroot}/var/lib/prometheus
+mkdir -vp %{buildroot}/usr/bin
+mkdir -vp %{buildroot}/etc/init.d
+mkdir -vp %{buildroot}/etc/sysconfig
+install -m 755 node_exporter-%{version}.linux-amd64/node_exporter %{buildroot}/usr/bin/node_exporter
+install -m 755 %{SOURCE1} %{buildroot}/etc/init.d/node_exporter
+install -m 644 %{SOURCE2} %{buildroot}/etc/sysconfig/node_exporter
 
 %clean
 
@@ -40,7 +43,7 @@ install -m 644 contrib/node_exporter.sysconfig $RPM_BUILD_ROOT/etc/sysconfig/nod
 getent group prometheus >/dev/null || groupadd -r prometheus
 getent passwd prometheus >/dev/null || \
   useradd -r -g prometheus -s /sbin/nologin \
-    -d $RPM_BUILD_ROOT/var/lib/prometheus/ -c "prometheus Daemons" prometheus
+    -d %{buildroot}/var/lib/prometheus/ -c "prometheus Daemons" prometheus
 exit 0
 
 %post
